@@ -26,10 +26,6 @@ services:
     volumes:
       - mongo-data:/data/db
 
-volumes:
-  mongo-data:
-  
-  
   nginx:
     image: nginx:latest
     ports:
@@ -39,3 +35,6 @@ volumes:
     depends_on:
       - frontend
       - backend
+
+volumes:
+  mongo-data:
