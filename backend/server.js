@@ -1,9 +1,14 @@
 require('dotenv').config(); 
 const express = require('express');
 const connectDB = require('./config/db'); 
+const cors = require('cors')
 
 const app = express();
 
+app.use(cors({
+  origin: 'http://localhost:3000'
+
+}));
 // Routes
 const resourceRoutes = require('./routes/resourceRoutes');
 const contactFormRoutes = require('./routes/contactformRoutes');
