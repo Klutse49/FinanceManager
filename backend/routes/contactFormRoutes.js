@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ContactForm = require('../models/ContactForm'); // Adjust the path to your actual model file
+const ContactForm = require('../models/ContactForm'); 
 
 // Route to create a new contact form submission
 router.post('/', async (req, res) => {

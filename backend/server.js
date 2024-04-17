@@ -11,7 +11,7 @@ app.use(cors({
 }));
 // Routes
 const resourceRoutes = require('./routes/resourceRoutes');
-const contactFormRoutes = require('./routes/contactformRoutes');
+const contactFormRoutes = require('./routes/contactFormRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const reportRoutes = require('./routes/reportRoutes');
