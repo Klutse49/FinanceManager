@@ -1,54 +1,58 @@
 require('dotenv').config();
 const express = require('express');
-const connectDB = require('./config/db');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet'); // Security middleware
+const rateLimit = require('express-rate-limit'); // Basic rate limiting
 
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+
+// Initialize express app
 const app = express();
+
+// Basic rate limiting for all requests
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
+// Apply security middleware
+app.use(helmet());
+
+// Apply the rate limiter to all requests
+app.use(limiter);
+
+// Set up CORS middleware for development (adjust in production)
+app.use(cors({
+    origin: 'http://localhost:3000' // Adjust this in production
+}));
 
 // Middleware to parse cookies and JSON bodies
 app.use(cookieParser());
 app.use(express.json());
 
-// Set CORS for development
-app.use(cors({
-    origin: 'http://localhost:3000'
-}));
+// Database connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log('MongoDB connected successfully.');
+  } catch (error) {
+    console.error('MongoDB connection failed:', error);
+    process.exit(1); // Exit process with failure
+  }
+};
 
-// Connect to MongoDB
 connectDB();
 
-// Define routes
-const resourceRoutes = require('./routes/resourceRoutes');
-const contactFormRoutes = require('./routes/contactFormRoutes');
-const budgetRoutes = require('./routes/budgetRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
-const reportRoutes = require('./routes/reportRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
-const authRoutes = require('./routes/authRoutes');
-
-// Mount routes
-app.use('/api/resources', resourceRoutes);
-app.use('/api/contact', contactFormRoutes);
-app.use('/api/budgets', budgetRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/transactions', transactionRoutes);
+// Use routes
 app.use('/api/auth', authRoutes);
 
-
-app.post('/login', (req, res) => {
-    const refreshToken = 'some_secure_token_here';
-    res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-        sameSite: 'strict'
-    });
-    res.send('Logged in successfully');
-});
-
-// Test route to ensure API is running
+// Basic route for testing server is up
 app.get('/', (req, res) => res.send('API Running'));
 
 // Fallback error handling middleware

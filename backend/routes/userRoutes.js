@@ -1,59 +1,34 @@
-const express = require('express');
-const User = require('../models/User'); // Adjust path as necessary
-const router = express.Router();
+const jwt = require('jsonwebtoken');
 
-// Create a new user
-router.post('/', async (req, res) => {
-  try {
-    const user = new User(req.body);
-    await user.save();
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
 
-// Get all users
-router.get('/', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+router.post('/register', async (req, res) => {
+    try {
+        const user = new User(req.body);
+        await user.save();
 
-// Get a single user by id
-router.get('/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(201).json({ token, user: { id: user._id, email: user.email, username: user.username } });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 });
 
-// Update a user
-router.put('/:id', async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(user);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-// Delete a user
-router.delete('/:id', async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
 
-module.exports = router;
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token, user: { id: user._id, email: user.email, username: user.username } });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
