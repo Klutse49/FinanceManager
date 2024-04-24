@@ -1,34 +1,36 @@
+// routes/userRoutes.js
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-
+// Register User
 router.post('/register', async (req, res) => {
     try {
-        const user = new User(req.body);
+        const { username, email, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ username, email, password: hashedPassword });
         await user.save();
-
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(201).json({ token, user: { id: user._id, email: user.email, username: user.username } });
+        res.status(201).send({ message: 'User registered successfully' });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(400).send({ message: 'Failed to register user', error: error.message });
     }
 });
 
+// Login User
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).send({ message: 'Invalid email or password' });
         }
-
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token, user: { id: user._id, email: user.email, username: user.username } });
+        res.send({ token, message: 'Login successful' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).send({ message: 'Server error', error: error.message });
     }
 });
+
+module.exports = router;
