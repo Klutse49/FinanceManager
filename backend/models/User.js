@@ -24,21 +24,10 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving
-UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-
-  try {
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
 // Method to compare the candidate password with the user's password
 UserSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', UserSchema);
+// Corrected the reference to UserSchema in the export line
+module.exports = mongoose.models.User || mongoose.model('User', UserSchema);

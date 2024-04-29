@@ -6,11 +6,11 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
+const contactRoutes = require('./routes/contactRoutes'); 
 
 const app = express();
 
@@ -23,7 +23,7 @@ const limiter = rateLimit({
 app.use(helmet());
 app.use(limiter);
 app.use(cors({
-    origin: 'http://localhost:3000', 
+    origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true
 }));
@@ -34,6 +34,7 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/auth', authRoutes);
+app.use('/api/contact', contactRoutes); 
 
 const connectDB = async () => {
   try {
