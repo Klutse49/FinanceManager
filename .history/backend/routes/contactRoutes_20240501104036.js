@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ContactForm = require('../models/ContactForm'); 
+const Contact = require('../models/ContactForm'); 
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 
@@ -14,7 +14,7 @@ const apiLimiter = rateLimit({
 router.use(apiLimiter);
 
 // Route to create a new contact form submission
-router.post('/', [
+router.post('/api/contact', [
     body('name').not().isEmpty().withMessage('Name cannot be empty.'),
     body('email').isEmail().withMessage('Please use a valid email address.'),
     body('message').not().isEmpty().withMessage('Message cannot be empty.')
@@ -34,7 +34,6 @@ router.post('/', [
         res.status(500).json({ message: 'Failed to send message. Please try again later.', error: error.message });
     }
 });
-
 
 // Export the router to use in the main Express app
 module.exports = router;

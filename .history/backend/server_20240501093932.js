@@ -37,7 +37,7 @@ app.use('/api/resources', resourceRoutes);
 app.use('/auth', authRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/contact', contactRoutes); 
-app.use('/api/chart',chartRoutes)
+app.use('/api/chart')
 
 const connectDB = async () => {
   try {

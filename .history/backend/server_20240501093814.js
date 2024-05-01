@@ -12,7 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
 const contactRoutes = require('./routes/contactRoutes'); 
 const budgetRoutes = require('./routes/budgetRoutes');
-const chartRoutes = require('./routes/chartRoutes')
+const chartRoutes = require('./routes')
 const app = express();
 
 // Basic rate limiting for all requests
@@ -37,7 +37,6 @@ app.use('/api/resources', resourceRoutes);
 app.use('/auth', authRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/contact', contactRoutes); 
-app.use('/api/chart',chartRoutes)
 
 const connectDB = async () => {
   try {
